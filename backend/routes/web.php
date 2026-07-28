@@ -1,0 +1,60 @@
+<?php
+
+use App\Http\Controllers\WelcomeController;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ImageUploadController;
+use App\Http\Controllers\ChunkedUploadController;
+use App\Http\Controllers\AnnotationClassController;
+use App\Http\Controllers\AnnotationController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PythonBridgeController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AssistantController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\ImagePreviewController;
+use App\Http\Controllers\DiagnosticController;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::patch('/settings', [SettingsController::class, 'update'])->name('settings.update');
+    Route::get('/settings/diagnostic', [DiagnosticController::class, 'index'])->name('settings.diagnostic');
+
+    Route::resource('projects', ProjectController::class);
+
+    Route::prefix('assistant')->group(function () {
+        Route::get('/', [AssistantController::class, 'index'])->name('assistant.index');
+        Route::post('/ask', [AssistantController::class, 'ask'])->name('assistant.ask');
+    });
+
+    Route::prefix('projects/{project}')->group(function () {
+        Route::post('/images/upload', [ImageUploadController::class, 'upload'])->name('projects.images.upload');
+        Route::post('/images/upload-chunk', [ChunkedUploadController::class, 'uploadChunk'])->name('projects.images.upload-chunk');
+        Route::get('/annotate/{imageUpload}', [ImageUploadController::class, 'annotate'])->name('projects.annotate');
+        Route::get('/images/{imageUpload}/preview', [ImagePreviewController::class, 'preview'])->name('projects.images.preview');
+
+        Route::post('/classes', [AnnotationClassController::class, 'store'])->name('projects.classes.store');
+        Route::delete('/classes/{annotationClass}', [AnnotationClassController::class, 'destroy'])->name('projects.classes.destroy');
+
+        Route::post('/annotations', [AnnotationController::class, 'store'])->name('projects.annotations.store');
+        Route::get('/annotations', [AnnotationController::class, 'index'])->name('projects.annotations.index');
+
+        Route::post('/segment', [PythonBridgeController::class, 'segment'])->name('projects.segment');
+        Route::post('/classify', [PythonBridgeController::class, 'classify'])->name('projects.classify');
+        Route::post('/analyze-health', [PythonBridgeController::class, 'analyzeHealth'])->name('projects.analyze-health');
+
+        Route::get('/health-report/{imageUpload}', [DashboardController::class, 'healthReport'])->name('projects.health-report');
+        Route::get('/images/{imageUpload}/heatmap', [PythonBridgeController::class, 'showHeatmap'])->name('projects.images.heatmap');
+    });
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+require __DIR__.'/auth.php';
