@@ -1,7 +1,8 @@
 # 🌍 GeoLens — AI-Powered Satellite Image Analysis and Classification System
 
 **GeoLens** is a comprehensive platform for analyzing satellite imagery using **Deep Learning** and **Computer Vision** technologies. The system supports **Semantic Segmentation**, **Object Classification**, **Crop Health Analysis**, and **Project Management** through an interactive web-based interface.
-
+> 🎓 **Graduation Project**  
+> Developed as a graduation project in collaboration with the **Egyptian Space Agency (EgSA)**.
 ---
 
 ## 📋 Table of Contents
